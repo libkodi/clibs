@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 3.21)
+
+project(CLIBS)
+
+set(CMAKE_CXX_STANDARD 14)
+message("use c++ version is ${CMAKE_CXX_STANDARD}")
+set(CLIBS_INCLUDE "${CLIBS_SOURCE_DIR}/include")
+message("use project include: ${CLIBS_INCLUDE}")
+set(EXECUTABLE_OUTPUT_PATH "${CLIBS_SOURCE_DIR}/bin")
+message("binary output path: ${EXECUTABLE_OUTPUT_PATH}")
+set(LIBRARY_OUTPUT_PATH "${CLIBS_SOURCE_DIR}/lib")
+message("library output path: ${LIBRARY_OUTPUT_PATH}")
+
+if(M32) 
+	message("flag: -m32 on")
+	set(CMAKE_CXX_FLAGS "-m32")
+endif()
+
+include_directories(${CLIBS_INCLUDE})
+
+if(WIN32)
+	message("default compiler: mingw")
+	string(REGEX REPLACE "/bin/.*" "" MINGW_ROOT ${CMAKE_CXX_COMPILER})
+	message("mingw path: ${MINGW_ROOT}")
+	set(MINGW_INCLUDE "${MINGW_ROOT}/opt/include")
+	message("use mingw include: ${MINGW_INCLUDE}")
+	set(MINGW_LIB "${MINGW_ROOT}/opt/lib")
+	message("use mingw lib: ${MINGW_LIB}")
+
+	link_directories(${MINGW_LIB})
+	include_directories(${MINGW_INCLUDE})
+
+	find_program(ICONV_PATH "iconv")
+	
+	if(NOT ICONV_PATH)
+		message("[Error]: Not found iconv.exe")
+	else()
+		string(REGEX REPLACE "/bin/.*" "" ICONV_ROOT ${ICONV_PATH})
+		set(ICONV_LIB "${ICONV_ROOT}/lib")
+		message("iconv found to: ${ICONV_PATH}")
+		message("use iconv lib: ${ICONV_LIB}")
+		link_directories(${ICONV_LIB})
+	endif()
+elseif(APPLE)
+	link_directories("/usr/local/opt/openssl/lib")
+	include_directories("/usr/local/opt/openssl/include")
+endif()
+
+add_subdirectory(tests)
+message("add subdirectory: tests")
