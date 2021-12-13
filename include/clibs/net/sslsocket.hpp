@@ -65,7 +65,7 @@ namespace clibs {
          * @param  cert_type        证书类型
          * @return                  是否添加成功
          */
-        bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type, std::function<int(SSL_CTX,const char*, const char*)> callback) {
+        bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type, std::function<int(SSL_CTX*,const char*, const char*)> callback) {
             int ret;
 
             if (callback != NULL) {
@@ -90,7 +90,7 @@ namespace clibs {
         }
 
         bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type) {
-            return socket_ssl_add_cert(ssock, cert_file, private_key_file, cert_type);
+            return socket_ssl_add_cert(ssock, cert_file, private_key_file, cert_type, NULL);
         }
 
         /**
