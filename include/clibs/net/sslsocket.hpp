@@ -51,10 +51,14 @@ namespace clibs {
          * @param  ssock ssl_socket_t
          * @return       是否成功
          */
-        bool socket_ssl_new(ssl_socket_t* ssock) {
-            ssock->ctx = SSL_CTX_new(SSLv23_client_method());
+        bool socket_ssl_new(ssl_socket_t* ssock, bool is_server) {
+            ssock->ctx = SSL_CTX_new(is_server ? SSLv23_server_method() : SSLv23_client_method());
 
             return ssock->ctx != NULL;
+        }
+
+        bool socket_ssl_new(ssl_socket_t* ssock) {
+            return socket_ssl_new(ssock, false);
         }
 
         /**
