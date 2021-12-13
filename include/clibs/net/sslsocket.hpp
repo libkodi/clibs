@@ -4,6 +4,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/conf.h>
+#include <functional>
 #include "clibs/net/socket.hpp"
 
 #ifdef _WIN32
@@ -64,8 +65,16 @@ namespace clibs {
          * @param  cert_type        证书类型
          * @return                  是否添加成功
          */
-        bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type) {
-            if (SSL_CTX_use_certificate_file(ssock->ctx, cert_file, cert_type) <= 0) {
+        bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type, std::function<int(SSL_CTX,const char*, const char*)> callback) {
+            int ret;
+
+            if (callback != NULL) {
+                ret = callback(ssock->ctx, cert_file, private_key_file);
+            } else {
+                ret = SSL_CTX_use_certificate_file(ssock->ctx, cert_file, cert_type);
+            }
+
+            if (ret <= 0) {
                 return false;
             }
 
@@ -80,13 +89,18 @@ namespace clibs {
             return true;
         }
 
+        bool socket_ssl_add_cert(ssl_socket_t* ssock, const char* cert_file, const char* private_key_file, int cert_type) {
+            return socket_ssl_add_cert(ssock, cert_file, private_key_file, cert_type);
+        }
+
         /**
          * 为ssl绑定socket描述符
          * @param ssock ssl_socket_t
          * @param sock  socket_t
          */
-        bool socket_ssl_bind(ssl_socket_t* ssock, socket_t* sock) {
-            ssock->ssl = SSL_new(ssock->ctx);
+        bool socket_ssl_bind(ssl_socket_t* ssock, SSL_CTX* ctx, socket_t* sock) {
+            ssock->ctx = ctx;
+            ssock->ssl = SSL_new(ctx);
 
             if (ssock->ssl == NULL) {
                 return false;
@@ -97,6 +111,10 @@ namespace clibs {
             }
 
             return true;
+        }
+
+        bool socket_ssl_bind(ssl_socket_t* ssock, socket_t* sock) {
+            return socket_ssl_bind(ssock, ssock->ctx, sock);
         }
 
         /**
