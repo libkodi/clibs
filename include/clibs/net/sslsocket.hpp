@@ -134,14 +134,18 @@ namespace clibs {
          * 关闭ssl连接
          * @param ssock ssl_socket_t
          */
-        void socket_ssl_close(const ssl_socket_t* ssock) {
-            if (ssock->ctx != NULL) {
+        void socket_ssl_close(const ssl_socket_t* ssock, bool with_ctx) {
+            if (ssock->ctx != NULL && with_ctx) {
                 SSL_CTX_free(ssock->ctx);
             }
 
             if (ssock->ssl != NULL) {
                 SSL_free(ssock->ssl);
             }
+        }
+
+        void socket_ssl_close(const ssl_socket_t* ssock) {
+            return socket_ssl_close(ssock, true);
         }
 
         /**
