@@ -117,3 +117,7 @@ target_link_libraries(sqlite3_test sqlite3)
 
 # create args
 add_executable(args_test args.cpp)
+
+# create uuid
+add_executable(uuid_test uuid.cpp)
+target_link_libraries(uuid_test uuid)
