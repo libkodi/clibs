@@ -120,4 +120,9 @@ add_executable(args_test args.cpp)
 
 # create uuid
 add_executable(uuid_test uuid.cpp)
+
+if(WIN32)
+target_link_libraries(uuid_test ole32)
+else()
 target_link_libraries(uuid_test uuid)
+endif()
