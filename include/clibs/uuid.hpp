@@ -5,26 +5,30 @@
 #include <cstring>
 #include <sstream>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <uuid/uuid.h>
+#endif
 
 namespace clibs {
     std::string uuid() {
+        std::string res;
+#ifdef _WIN32
+        UuidCreate(&uuid);
+        char* uuid_cstr = nullptr;
+        UuidToStringA(&uuid, reinterpret_cast<RPC_CSTR*>(&uuid_cstr));
+        res = std::string(uuid_cstr);
+        RpcStringFreeA(reinterpret_cast<RPC_CSTR*>(&uuid_cstr));
+#else
         uuid_t uid;
+        char uuid_cstr[36];
         uuid_generate(uid);
-        char temp[2];
-        std::string uuid_str;
-
-        for (int i = 0; i < 16; i ++) {
-            memset(temp, 0, 2);
-            sprintf(temp, "%02x", uid[i]);
-            uuid_str += temp;
-
-            if (i == 3 || i == 5 || i == 7 || i == 9) {
-                uuid_str += "-";
-            }
-        }
-
-        return uuid_str;
+        uuid_unparse(uid, uuid_cstr);
+        res = std::string(uuid_cstr);
+#endif
+        
+        return res;
     }
 }
 
